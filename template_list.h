@@ -17,13 +17,13 @@ extern "C" {
 /* This macros generates definition of a specific type of List(T) */
 #define TemplateList(T)                                                         \
                                                                                 \
-cclass_(List_##T) {                                                             \
-    struct Node_##T {                                                           \
-        T                   _data;                                              \
-        struct Node_##T*    _next;                                              \
-        struct Node_##T*    _prev;                                              \
-    };                                                                          \
+typedef struct Node_##T {                                                       \
+    T                   _data;                                                  \
+    struct Node_##T*    _next;                                                  \
+    struct Node_##T*    _prev;                                                  \
+} Node_##T;                                                                     \
                                                                                 \
+cclass_(List_##T) {                                                             \
     /* fields */                                                                \
     size_t              _size;                                                  \
     struct Node_##T*    _head;                                                  \
@@ -50,6 +50,48 @@ cclass_(List_##T) {                                                             
                                                                                 \
 constructor_(List(T))();                                                        \
 destructor_(List(T));
+
+
+#define TemplateListImplementation(T)                                           \
+                                                                                \
+method_body_(_Bool, is_empty, List(T)) without_args {                           \
+    return self->_size == 0;                                                    \
+}                                                                               \
+                                                                                \
+                                                                                \
+method_body_(void, push_back, List(T)) with_(T value) {                         \
+    Node_##T* node = malloc(sizeof(Node_##T));                                  \
+                                                                                \
+    node->_data = value;                                                        \
+    node->_next = NULL;                                                         \
+                                                                                \
+    if (self->is_empty(self)) {                                                 \
+        self->_head = node;                                                     \
+        self->_tail = node;                                                     \
+        node->_prev = NULL;                                                     \
+    } else {                                                                    \
+        self->_tail->_next = node;                                              \
+        node->_prev = self->_tail;                                              \
+        self->_tail = node;                                                     \
+    }                                                                           \
+                                                                                \
+    ++self->_size;                                                              \
+}                                                                               \
+                                                                                \
+                                                                                \
+constructor_(List(T))() {                                                       \
+    new_self_(T);                                                               \
+                                                                                \
+    self->_size = 0;                                                            \
+    self->_head = NULL;                                                         \
+    self->_tail = NULL;                                                         \
+    self->_cache = NULL;                                                        \
+                                                                                \
+    init_method_(is_empty);                                                     \
+    init_method_(push_back);                                                    \
+                                                                                \
+    return self;                                                                \
+}
 
 
 #ifdef __cplusplus
