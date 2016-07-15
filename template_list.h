@@ -14,21 +14,21 @@ extern "C" {
 #define List(T) List_##T
 
 
-/* This macros generates defenition of a specific type of List(T) */
+/* This macros generates definition of a specific type of List(T) */
 #define TemplateList(T)                                                         \
                                                                                 \
 cclass_(List_##T) {                                                             \
-    typedef struct Node_##T* {                                                  \
+    struct Node_##T {                                                           \
         T                   _data;                                              \
         struct Node_##T*    _next;                                              \
         struct Node_##T*    _prev;                                              \
-    } Node_##T;                                                                 \
+    };                                                                          \
                                                                                 \
     /* fields */                                                                \
-    size_t      _size;                                                          \
-    Node_##T*   _head;                                                          \
-    Node_##T*   _tail;                                                          \
-    Node_##T*   _cach;                                                          \
+    size_t              _size;                                                  \
+    struct Node_##T*    _head;                                                  \
+    struct Node_##T*    _tail;                                                  \
+    struct Node_##T*    _cache;                                                 \
                                                                                 \
     /* methods */                                                               \
     method_def_(void,   push_back,  List(T)) with_(T value);                    \
@@ -45,6 +45,7 @@ cclass_(List_##T) {                                                             
     method_def_(void,   clear,      List(T)) without_args;                      \
     method_def_(void,   swap,       List(T)) with_(int index_1, int index_2);   \
     method_def_(List(T), copy,      List(T)) without_args;                      \
+    method_def_(List(T), slice,     List(T)) with_(int beg, int end, int step); \
 };                                                                              \
                                                                                 \
 constructor_(List(T))();                                                        \
