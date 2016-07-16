@@ -7,6 +7,7 @@ extern "C" {
 
 #include "lib/cclasses/cclasses.h"
 #include "lib/cexception/CException.h"
+#include "error_codes.h"
 #include <stdlib.h>
 
 
@@ -23,12 +24,13 @@ typedef struct Node_##T {                                                       
     struct Node_##T*    _prev;                                                  \
 } Node_##T;                                                                     \
                                                                                 \
+                                                                                \
 cclass_(List_##T) {                                                             \
     /* fields */                                                                \
-    size_t              _size;                                                  \
-    struct Node_##T*    _head;                                                  \
-    struct Node_##T*    _tail;                                                  \
-    struct Node_##T*    _cache;                                                 \
+    size_t      _size;                                                          \
+    Node_##T*   _head;                                                          \
+    Node_##T*   _tail;                                                          \
+    Node_##T*   _cache;                                                         \
                                                                                 \
     /* methods */                                                               \
     method_def_(void,   push_back,  List(T)) with_(T value);                    \
@@ -79,6 +81,50 @@ method_body_(void, push_back, List(T)) with_(T value) {                         
 }                                                                               \
                                                                                 \
                                                                                 \
+method_body_(void, push_front, List(T)) with_(T value) {                        \
+    Node_##T* node = malloc(sizeof(Node_##T));                                  \
+                                                                                \
+    node->_data = value;                                                        \
+    node->_prev = NULL;                                                         \
+                                                                                \
+    if (self->is_empty(self)) {                                                 \
+        self->_head = node;                                                     \
+        self->_tail = node;                                                     \
+        node->_next = NULL;                                                     \
+    } else {                                                                    \
+        self->_head->_prev = node;                                              \
+        node->_next = self->head;                                               \
+        self->_head = node;                                                     \
+    }                                                                           \
+                                                                                \
+    ++self->_size;                                                              \
+}                                                                               \
+                                                                                \
+                                                                                \
+method_body_(T, pop_back, List(T)) without_args {                               \
+    if (self->is_empty(self)) {                                                 \
+        Throw(EMPTY_LIST);                                                      \
+    }                                                                           \
+                                                                                \
+    T value = self->_tail->_data;                                               \
+                                                                                \
+    if (self->_size > 1) {                                                      \
+        self->_tail->_prev->_next = NULL;                                       \
+        Node_##T* temp = self->_tail;                                           \
+        self->_tail = temp->_prev;                                              \
+        free(temp);                                                             \
+    } else {    /* 1 element in the list */                                     \
+        self->_head = NULL;                                                     \
+        free(self->_tail);                                                      \
+        self->_tail = NULL;                                                     \
+    }                                                                           \
+                                                                                \
+    --self->_size;                                                              \
+                                                                                \
+    return value;                                                               \
+} throws_(EMPTY_LIST)                                                           \
+                                                                                \
+                                                                                \
 constructor_(List(T))() {                                                       \
     new_self_(T);                                                               \
                                                                                 \
@@ -89,6 +135,7 @@ constructor_(List(T))() {                                                       
                                                                                 \
     init_method_(is_empty);                                                     \
     init_method_(push_back);                                                    \
+    init_method_(push_front);                                                   \
                                                                                 \
     return self;                                                                \
 }

@@ -6,4 +6,5 @@ CONFIG -= qt
 SOURCES += main.c
 
 HEADERS += \
-    template_list.h
+    template_list.h \
+    error_codes.h
