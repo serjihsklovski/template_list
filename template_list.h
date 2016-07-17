@@ -93,7 +93,7 @@ method_body_(void, push_front, List(T)) with_(T value) {                        
         node->_next = NULL;                                                     \
     } else {                                                                    \
         self->_head->_prev = node;                                              \
-        node->_next = self->head;                                               \
+        node->_next = self->_head;                                              \
         self->_head = node;                                                     \
     }                                                                           \
                                                                                 \
@@ -125,8 +125,32 @@ method_body_(T, pop_back, List(T)) without_args {                               
 } throws_(EMPTY_LIST)                                                           \
                                                                                 \
                                                                                 \
+method_body_(T, pop_front, List(T)) without_args {                              \
+    if (self->is_empty(self)) {                                                 \
+        Throw(EMPTY_LIST);                                                      \
+    }                                                                           \
+                                                                                \
+    T value = self->_head->_data;                                               \
+                                                                                \
+    if (self->_size > 1) {                                                      \
+        self->_head->_next->_prev = NULL;                                       \
+        Node_##T* temp = self->_head;                                           \
+        self->_head = temp->_next;                                              \
+        free(temp);                                                             \
+    } else {    /* 1 element in the list */                                     \
+        self->_tail = NULL;                                                     \
+        free(self->_head);                                                      \
+        self->_head = NULL;                                                     \
+    }                                                                           \
+                                                                                \
+    --self->_size;                                                              \
+                                                                                \
+    return value;                                                               \
+} throws_(EMPTY_LIST)                                                           \
+                                                                                \
+                                                                                \
 constructor_(List(T))() {                                                       \
-    new_self_(T);                                                               \
+    new_self_(List_##T);                                                        \
                                                                                 \
     self->_size = 0;                                                            \
     self->_head = NULL;                                                         \
@@ -136,6 +160,8 @@ constructor_(List(T))() {                                                       
     init_method_(is_empty);                                                     \
     init_method_(push_back);                                                    \
     init_method_(push_front);                                                   \
+    init_method_(pop_back);                                                     \
+    init_method_(pop_front);                                                    \
                                                                                 \
     return self;                                                                \
 }
