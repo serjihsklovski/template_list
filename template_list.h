@@ -56,6 +56,30 @@ destructor_(List(T));
 
 #define TemplateListImplementation(T)                                           \
                                                                                 \
+static void _free_node(List(T) self) {                                          \
+    if (!self->is_empty(self)) {                                                \
+        if (self->_size > 1) {                                                  \
+            self->_head->_next->_prev = NULL;                                   \
+            Node_##T* temp = self->_head;                                       \
+            self->_head = temp->_next;                                          \
+            free(temp);                                                         \
+            temp->_next = NULL;                                                 \
+            temp->_prev = NULL;                                                 \
+                                                                                \
+            --self->_size;                                                      \
+                                                                                \
+            _free_node(self);   /* recursive invocation */                      \
+        } else {    /* only 1 element in the list */                            \
+            free(self->_head);                                                  \
+            self->_head = NULL;                                                 \
+            self->_head = NULL;                                                 \
+                                                                                \
+            --self->_size;                                                      \
+        }                                                                       \
+    }                                                                           \
+}                                                                               \
+                                                                                \
+                                                                                \
 method_body_(_Bool, is_empty, List(T)) without_args {                           \
     return self->_size == 0;                                                    \
 }                                                                               \
@@ -164,6 +188,12 @@ constructor_(List(T))() {                                                       
     init_method_(pop_front);                                                    \
                                                                                 \
     return self;                                                                \
+}                                                                               \
+                                                                                \
+                                                                                \
+destructor_(List(T)) {                                                          \
+    _free_node(self);                                                           \
+    free(self);                                                                 \
 }
 
 

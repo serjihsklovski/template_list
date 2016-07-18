@@ -20,6 +20,12 @@ int main() {
 
     printf("lst is empty: %d\n", lst->is_empty(lst));
 
+    lst->push_back(lst, 111.111);
+    lst->push_back(lst, -222.222);
+    lst->push_front(lst, 333.333);
+    lst->push_front(lst, -444.444);
+
+    delete_List_double(lst);
 
     return 0;
 }
