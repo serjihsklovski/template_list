@@ -80,6 +80,11 @@ static void _free_node(List(T) self) {                                          
 }                                                                               \
                                                                                 \
                                                                                 \
+static int _get_abs_index(int relative_index, size_t size) {                    \
+    return relative_index >= 0 ? relative_index : (int) size + relative_index;  \
+}                                                                               \
+                                                                                \
+                                                                                \
 method_body_(_Bool, is_empty, List(T)) without_args {                           \
     return self->_size == 0;                                                    \
 }                                                                               \
@@ -173,6 +178,17 @@ method_body_(T, pop_front, List(T)) without_args {                              
 } throws_(EMPTY_LIST)                                                           \
                                                                                 \
                                                                                 \
+method_body_(_Bool, has_index, List(T)) with_(int index) {                      \
+    index = _get_abs_index(index, self->_size);                                 \
+                                                                                \
+    if (index >= 0 && index < (int) self->_size) {                              \
+        return 1;                                                               \
+    }                                                                           \
+                                                                                \
+    return 0;                                                                   \
+}                                                                               \
+                                                                                \
+                                                                                \
 constructor_(List(T))() {                                                       \
     new_self_(List_##T);                                                        \
                                                                                 \
@@ -186,6 +202,7 @@ constructor_(List(T))() {                                                       
     init_method_(push_front);                                                   \
     init_method_(pop_back);                                                     \
     init_method_(pop_front);                                                    \
+    init_method_(has_index);                                                    \
                                                                                 \
     return self;                                                                \
 }                                                                               \
