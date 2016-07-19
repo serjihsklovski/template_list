@@ -165,26 +165,7 @@ method_body_(_Bool, has_index, List(T)) with_(int index) {                      
 }                                                                               \
                                                                                 \
                                                                                 \
-constructor_(List(T))() {                                                       \
-    new_self_(List_##T);                                                        \
-                                                                                \
-    self->_size = 0;                                                            \
-    self->_head = NULL;                                                         \
-    self->_tail = NULL;                                                         \
-    self->_cache = NULL;                                                        \
-                                                                                \
-    init_method_(is_empty);                                                     \
-    init_method_(push_back);                                                    \
-    init_method_(push_front);                                                   \
-    init_method_(pop_back);                                                     \
-    init_method_(pop_front);                                                    \
-    init_method_(has_index);                                                    \
-                                                                                \
-    return self;                                                                \
-}                                                                               \
-                                                                                \
-                                                                                \
-destructor_(List(T)) {                                                          \
+method_body_(void, clear, List(T)) without_args {                               \
     while (!self->is_empty(self)) {                                             \
         if (self->_size > 1) {                                                  \
             self->_head->_next->_prev = NULL;                                   \
@@ -201,7 +182,31 @@ destructor_(List(T)) {                                                          
                                                                                 \
         --self->_size;                                                          \
     }                                                                           \
+}                                                                               \
                                                                                 \
+                                                                                \
+constructor_(List(T))() {                                                       \
+    new_self_(List_##T);                                                        \
+                                                                                \
+    self->_size = 0;                                                            \
+    self->_head = NULL;                                                         \
+    self->_tail = NULL;                                                         \
+    self->_cache = NULL;                                                        \
+                                                                                \
+    init_method_(is_empty);                                                     \
+    init_method_(push_back);                                                    \
+    init_method_(push_front);                                                   \
+    init_method_(pop_back);                                                     \
+    init_method_(pop_front);                                                    \
+    init_method_(has_index);                                                    \
+    init_method_(clear);                                                        \
+                                                                                \
+    return self;                                                                \
+}                                                                               \
+                                                                                \
+                                                                                \
+destructor_(List(T)) {                                                          \
+    self->clear(self);                                                          \
     free(self);                                                                 \
     self = NULL;                                                                \
 }
