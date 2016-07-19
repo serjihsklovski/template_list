@@ -56,30 +56,6 @@ destructor_(List(T));
 
 #define TemplateListImplementation(T)                                           \
                                                                                 \
-static void _free_node(List(T) self) {                                          \
-    if (!self->is_empty(self)) {                                                \
-        if (self->_size > 1) {                                                  \
-            self->_head->_next->_prev = NULL;                                   \
-            Node_##T* temp = self->_head;                                       \
-            self->_head = temp->_next;                                          \
-            free(temp);                                                         \
-            temp->_next = NULL;                                                 \
-            temp->_prev = NULL;                                                 \
-                                                                                \
-            --self->_size;                                                      \
-                                                                                \
-            _free_node(self);   /* recursive invocation */                      \
-        } else {    /* only 1 element in the list */                            \
-            free(self->_head);                                                  \
-            self->_head = NULL;                                                 \
-            self->_head = NULL;                                                 \
-                                                                                \
-            --self->_size;                                                      \
-        }                                                                       \
-    }                                                                           \
-}                                                                               \
-                                                                                \
-                                                                                \
 static int _get_abs_index(int relative_index, size_t size) {                    \
     return relative_index >= 0 ? relative_index : (int) size + relative_index;  \
 }                                                                               \
@@ -209,8 +185,25 @@ constructor_(List(T))() {                                                       
                                                                                 \
                                                                                 \
 destructor_(List(T)) {                                                          \
-    _free_node(self);                                                           \
+    while (!self->is_empty(self)) {                                             \
+        if (self->_size > 1) {                                                  \
+            self->_head->_next->_prev = NULL;                                   \
+            Node_##T* temp = self->_head;                                       \
+            self->_head = temp->_next;                                          \
+            free(temp);                                                         \
+            temp->_next = NULL;                                                 \
+            temp->_prev = NULL;                                                 \
+        } else {    /* only 1 element in the list */                            \
+            free(self->_head);                                                  \
+            self->_head = NULL;                                                 \
+            self->_head = NULL;                                                 \
+        }                                                                       \
+                                                                                \
+        --self->_size;                                                          \
+    }                                                                           \
+                                                                                \
     free(self);                                                                 \
+    self = NULL;                                                                \
 }
 
 
