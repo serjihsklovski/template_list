@@ -29,6 +29,15 @@ int main() {
     for (int i = 0; i < (int) lst->_size; ++i) {
         printf("%d: %lf\n", i, lst->at(lst, i));
     }
+    puts("");
+
+    for (int i = 0; i < (int) lst->_size; ++i) {
+        lst->set(lst, i, (i + 1) * 111.111);
+    }
+
+    for (int i = 0; i < (int) lst->_size; ++i) {
+        printf("%d: %lf\n", i, lst->at(lst, i));
+    }
 
     delete_List_double(lst);
 

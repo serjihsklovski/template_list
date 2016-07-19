@@ -227,6 +227,39 @@ method_body_(T, at, List(T)) with_(int index) {                                 
 } throws_(INDEX_IS_OUT_OF_RANGE)                                                \
                                                                                 \
                                                                                 \
+method_body_(void, set, List(T)) with_(int index, T value) {                    \
+    if (!self->has_index(self, index)) {                                        \
+        Throw(INDEX_IS_OUT_OF_RANGE);                                           \
+    }                                                                           \
+                                                                                \
+    Node_##T* node;                                                             \
+    int i;                                                                      \
+    index = _get_abs_index(index, self->_size);                                 \
+                                                                                \
+    if (_near_head(index, self->_size)) {                                       \
+        node = self->_head;                                                     \
+        i = 0;                                                                  \
+                                                                                \
+        while (i < index) {                                                     \
+            node = node->_next;                                                 \
+            ++i;                                                                \
+        }                                                                       \
+                                                                                \
+        node->_data = value;                                                    \
+    } else {                                                                    \
+        node = self->_tail;                                                     \
+        i = self->_size - 1;                                                    \
+                                                                                \
+        while (i > index) {                                                     \
+            node = node->_prev;                                                 \
+            --i;                                                                \
+        }                                                                       \
+                                                                                \
+        node->_data = value;                                                    \
+    }                                                                           \
+} throws_(INDEX_IS_OUT_OF_RANGE)                                                \
+                                                                                \
+                                                                                \
 constructor_(List(T))() {                                                       \
     new_self_(List_##T);                                                        \
                                                                                 \
@@ -243,6 +276,7 @@ constructor_(List(T))() {                                                       
     init_method_(has_index);                                                    \
     init_method_(clear);                                                        \
     init_method_(at);                                                           \
+    init_method_(set);                                                          \
                                                                                 \
     return self;                                                                \
 }                                                                               \
