@@ -61,6 +61,12 @@ static int _get_abs_index(int relative_index, size_t size) {                    
 }                                                                               \
                                                                                 \
                                                                                 \
+static _Bool _near_head(int index, size_t size) {                               \
+    int mid = (int) size / 2;                                                   \
+    return index <= mid;                                                        \
+}                                                                               \
+                                                                                \
+                                                                                \
 method_body_(_Bool, is_empty, List(T)) without_args {                           \
     return self->_size == 0;                                                    \
 }                                                                               \
@@ -185,6 +191,42 @@ method_body_(void, clear, List(T)) without_args {                               
 }                                                                               \
                                                                                 \
                                                                                 \
+method_body_(T, at, List(T)) with_(int index) {                                 \
+    if (!self->has_index(self, index)) {                                        \
+        Throw(INDEX_IS_OUT_OF_RANGE);                                           \
+    }                                                                           \
+                                                                                \
+    T value;                                                                    \
+    Node_##T* node;                                                             \
+    int i;                                                                      \
+    index = _get_abs_index(index, self->_size);                                 \
+                                                                                \
+    if (_near_head(index, self->_size)) {                                       \
+        node = self->_head;                                                     \
+        i = 0;                                                                  \
+                                                                                \
+        while (i < index) {                                                     \
+            node = node->_next;                                                 \
+            ++i;                                                                \
+        }                                                                       \
+                                                                                \
+        value = node->_data;                                                    \
+    } else {                                                                    \
+        node = self->_tail;                                                     \
+        i = self->_size - 1;                                                    \
+                                                                                \
+        while (i > index) {                                                     \
+            node = node->_prev;                                                 \
+            --i;                                                                \
+        }                                                                       \
+                                                                                \
+        value = node->_data;                                                    \
+    }                                                                           \
+                                                                                \
+    return value;                                                               \
+} throws_(INDEX_IS_OUT_OF_RANGE)                                                \
+                                                                                \
+                                                                                \
 constructor_(List(T))() {                                                       \
     new_self_(List_##T);                                                        \
                                                                                 \
@@ -200,6 +242,7 @@ constructor_(List(T))() {                                                       
     init_method_(pop_front);                                                    \
     init_method_(has_index);                                                    \
     init_method_(clear);                                                        \
+    init_method_(at);                                                           \
                                                                                 \
     return self;                                                                \
 }                                                                               \

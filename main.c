@@ -20,10 +20,15 @@ int main() {
 
     printf("lst is empty: %d\n", lst->is_empty(lst));
 
-    lst->push_back(lst, 111.111);
-    lst->push_back(lst, -222.222);
-    lst->push_front(lst, 333.333);
-    lst->push_front(lst, -444.444);
+    lst->push_back(lst, 111.111);       // [111.111]
+    lst->push_back(lst, -222.222);      // [111.111, -222.222]
+    lst->push_front(lst, 333.333);      // [333.333, 111.111, -222.222]
+    lst->push_front(lst, -444.444);     // [-444.444, 333.333, 111.111, -222.222]
+    lst->push_back(lst, 555.555);       // [-444.444, 333.333, 111.111, -222.222, 555.555]
+
+    for (int i = 0; i < (int) lst->_size; ++i) {
+        printf("%d: %lf\n", i, lst->at(lst, i));
+    }
 
     delete_List_double(lst);
 
