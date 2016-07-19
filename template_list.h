@@ -67,6 +67,32 @@ static _Bool _near_head(int index, size_t size) {                               
 }                                                                               \
                                                                                 \
                                                                                 \
+static Node_##T* _search_node(List(T) lst, int index) {                         \
+    Node_##T* node;                                                             \
+    int i;                                                                      \
+                                                                                \
+    if (_near_head(index, lst->_size)) {                                        \
+        node = lst->_head;                                                      \
+        i = 0;                                                                  \
+                                                                                \
+        while (i < index) {                                                     \
+            node = node->_next;                                                 \
+            ++i;                                                                \
+        }                                                                       \
+    } else {                                                                    \
+        node = lst->_tail;                                                      \
+        i = lst->_size - 1;                                                     \
+                                                                                \
+        while (i > index) {                                                     \
+            node = node->_prev;                                                 \
+            --i;                                                                \
+        }                                                                       \
+    }                                                                           \
+                                                                                \
+    return node;                                                                \
+}                                                                               \
+                                                                                \
+                                                                                \
 method_body_(_Bool, is_empty, List(T)) without_args {                           \
     return self->_size == 0;                                                    \
 }                                                                               \
@@ -196,34 +222,7 @@ method_body_(T, at, List(T)) with_(int index) {                                 
         Throw(INDEX_IS_OUT_OF_RANGE);                                           \
     }                                                                           \
                                                                                 \
-    T value;                                                                    \
-    Node_##T* node;                                                             \
-    int i;                                                                      \
-    index = _get_abs_index(index, self->_size);                                 \
-                                                                                \
-    if (_near_head(index, self->_size)) {                                       \
-        node = self->_head;                                                     \
-        i = 0;                                                                  \
-                                                                                \
-        while (i < index) {                                                     \
-            node = node->_next;                                                 \
-            ++i;                                                                \
-        }                                                                       \
-                                                                                \
-        value = node->_data;                                                    \
-    } else {                                                                    \
-        node = self->_tail;                                                     \
-        i = self->_size - 1;                                                    \
-                                                                                \
-        while (i > index) {                                                     \
-            node = node->_prev;                                                 \
-            --i;                                                                \
-        }                                                                       \
-                                                                                \
-        value = node->_data;                                                    \
-    }                                                                           \
-                                                                                \
-    return value;                                                               \
+    return _search_node(self, _get_abs_index(index, self->_size))->_data;       \
 } throws_(INDEX_IS_OUT_OF_RANGE)                                                \
                                                                                 \
                                                                                 \
@@ -232,31 +231,7 @@ method_body_(void, set, List(T)) with_(int index, T value) {                    
         Throw(INDEX_IS_OUT_OF_RANGE);                                           \
     }                                                                           \
                                                                                 \
-    Node_##T* node;                                                             \
-    int i;                                                                      \
-    index = _get_abs_index(index, self->_size);                                 \
-                                                                                \
-    if (_near_head(index, self->_size)) {                                       \
-        node = self->_head;                                                     \
-        i = 0;                                                                  \
-                                                                                \
-        while (i < index) {                                                     \
-            node = node->_next;                                                 \
-            ++i;                                                                \
-        }                                                                       \
-                                                                                \
-        node->_data = value;                                                    \
-    } else {                                                                    \
-        node = self->_tail;                                                     \
-        i = self->_size - 1;                                                    \
-                                                                                \
-        while (i > index) {                                                     \
-            node = node->_prev;                                                 \
-            --i;                                                                \
-        }                                                                       \
-                                                                                \
-        node->_data = value;                                                    \
-    }                                                                           \
+    _search_node(self, _get_abs_index(index, self->_size))->_data = value;      \
 } throws_(INDEX_IS_OUT_OF_RANGE)                                                \
                                                                                 \
                                                                                 \
