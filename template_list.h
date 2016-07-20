@@ -235,6 +235,30 @@ method_body_(void, set, List(T)) with_(int index, T value) {                    
 } throws_(INDEX_IS_OUT_OF_RANGE)                                                \
                                                                                 \
                                                                                 \
+method_body_(void, insert, List(T)) with_(int index, T value) {                 \
+    if (!self->has_index(self, index)) {                                        \
+        Throw(INDEX_IS_OUT_OF_RANGE);                                           \
+    }                                                                           \
+                                                                                \
+    index = _get_abs_index(index, self->_size);                                 \
+                                                                                \
+    if (index == 0) {                                                           \
+        self->push_front(self, value);                                          \
+    } else {                                                                    \
+        Node_##T* node = _search_node(self, index);                             \
+        Node_##T* new_node = (Node_##T*) malloc(sizeof(Node_##T));              \
+                                                                                \
+        new_node->_data = value;                                                \
+        new_node->_next = node;                                                 \
+        new_node->_prev = node->_prev;                                          \
+        node->_prev = new_node;                                                 \
+        new_node->_prev->_next = new_node;                                      \
+                                                                                \
+        ++self->_size;                                                          \
+    }                                                                           \
+} throws_(INDEX_IS_OUT_OF_RANGE)                                                \
+                                                                                \
+                                                                                \
 constructor_(List(T))() {                                                       \
     new_self_(List_##T);                                                        \
                                                                                 \
@@ -252,6 +276,7 @@ constructor_(List(T))() {                                                       
     init_method_(clear);                                                        \
     init_method_(at);                                                           \
     init_method_(set);                                                          \
+    init_method_(insert);                                                       \
                                                                                 \
     return self;                                                                \
 }                                                                               \
