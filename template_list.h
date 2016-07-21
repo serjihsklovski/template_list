@@ -42,6 +42,8 @@ cclass_(List_##T) {                                                             
     method_def_(T,      at,         List(T)) with_(int index);                  \
     method_def_(void,   set,        List(T)) with_(int index, T value);         \
     method_def_(void,   insert,     List(T)) with_(int index, T value);         \
+    method_def_(void,   append,     List(T)) with_(List(T) lst);                \
+    method_def_(void,   prepend,    List(T)) with_(List(T) lst);                \
     method_def_(void,   embed,      List(T)) with_(int index, List(T) lst);     \
     method_def_(T,      pop,        List(T)) with_(int index);                  \
     method_def_(void,   clear,      List(T)) without_args;                      \
@@ -209,7 +211,7 @@ method_body_(void, clear, List(T)) without_args {                               
         } else {    /* only 1 element in the list */                            \
             free(self->_head);                                                  \
             self->_head = NULL;                                                 \
-            self->_head = NULL;                                                 \
+            self->_tail = NULL;                                                 \
         }                                                                       \
                                                                                 \
         --self->_size;                                                          \
@@ -259,6 +261,106 @@ method_body_(void, insert, List(T)) with_(int index, T value) {                 
 } throws_(INDEX_IS_OUT_OF_RANGE)                                                \
                                                                                 \
                                                                                 \
+method_body_(void, append, List(T)) with_(List(T) lst) {                        \
+    Node_##T* node = lst->_head;                                                \
+    Node_##T* new_node;                                                         \
+                                                                                \
+    if (self->is_empty(self)) {                                                 \
+        new_node = (Node_##T*) malloc(sizeof(Node_##T));                        \
+                                                                                \
+        new_node->_data = node->_data;                                          \
+        new_node->_next = NULL;                                                 \
+        new_node->_prev = NULL;                                                 \
+                                                                                \
+        self->_head = new_node;                                                 \
+        self->_tail = new_node;                                                 \
+                                                                                \
+        node = node->_next;                                                     \
+    }                                                                           \
+                                                                                \
+    while (node != NULL) {                                                      \
+        new_node = (Node_##T*) malloc(sizeof(Node_##T));                        \
+                                                                                \
+        new_node->_data = node->_data;                                          \
+        new_node->_next = NULL;                                                 \
+        new_node->_prev = self->_tail;                                          \
+                                                                                \
+        self->_tail->_next = new_node;                                          \
+        self->_tail = new_node;                                                 \
+                                                                                \
+        node = node->_next;                                                     \
+    }                                                                           \
+                                                                                \
+    self->_size += lst->_size;                                                  \
+}                                                                               \
+                                                                                \
+                                                                                \
+method_body_(void, prepend, List(T)) with_(List(T) lst) {                       \
+    Node_##T* node = lst->_tail;                                                \
+    Node_##T* new_node;                                                         \
+                                                                                \
+    if (self->is_empty(self)) {                                                 \
+        new_node = (Node_##T*) malloc(sizeof(Node_##T));                        \
+                                                                                \
+        new_node->_data = node->_data;                                          \
+        new_node->_next = NULL;                                                 \
+        new_node->_prev = NULL;                                                 \
+                                                                                \
+        self->_head = new_node;                                                 \
+        self->_tail = new_node;                                                 \
+                                                                                \
+        node = node->_prev;                                                     \
+    }                                                                           \
+                                                                                \
+    while (node != NULL) {                                                      \
+        new_node = (Node_##T*) malloc(sizeof(Node_##T));                        \
+                                                                                \
+        new_node->_data = node->_data;                                          \
+        new_node->_prev = NULL;                                                 \
+        new_node->_next = self->_head;                                          \
+                                                                                \
+        self->_head->_prev = new_node;                                          \
+        self->_head = new_node;                                                 \
+                                                                                \
+        node = node->_prev;                                                     \
+    }                                                                           \
+                                                                                \
+    self->_size += lst->_size;                                                  \
+}                                                                               \
+                                                                                \
+                                                                                \
+method_body_(void, embed, List(T)) with_(int index, List(T) lst) {              \
+    if (!self->has_index(self, index)) {                                        \
+        Throw(INDEX_IS_OUT_OF_RANGE);                                           \
+    }                                                                           \
+                                                                                \
+    index = _get_abs_index(index, self->_size);                                 \
+                                                                                \
+    if (index == 0) {                                                           \
+        self->prepend(self, lst);                                               \
+    } else {                                                                    \
+        Node_##T* head = _search_node(self, index);                             \
+        Node_##T* node = lst->_head;                                            \
+        Node_##T* new_node;                                                     \
+                                                                                \
+        while (node != NULL) {                                                  \
+            new_node = (Node_##T*) malloc(sizeof(Node_##T));                    \
+                                                                                \
+            new_node->_data = node->_data;                                      \
+            new_node->_next = head;                                             \
+            new_node->_prev = head->_prev;                                      \
+                                                                                \
+            head->_prev = new_node;                                             \
+            new_node->_prev->_next = new_node;                                  \
+                                                                                \
+            node = node->_next;                                                 \
+        }                                                                       \
+                                                                                \
+        self->_size += lst->_size;                                              \
+    }                                                                           \
+} throws_(INDEX_IS_OUT_OF_RANGE)                                                \
+                                                                                \
+                                                                                \
 constructor_(List(T))() {                                                       \
     new_self_(List_##T);                                                        \
                                                                                 \
@@ -277,6 +379,9 @@ constructor_(List(T))() {                                                       
     init_method_(at);                                                           \
     init_method_(set);                                                          \
     init_method_(insert);                                                       \
+    init_method_(append);                                                       \
+    init_method_(prepend);                                                      \
+    init_method_(embed);                                                        \
                                                                                 \
     return self;                                                                \
 }                                                                               \
