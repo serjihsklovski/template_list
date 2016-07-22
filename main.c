@@ -60,6 +60,13 @@ int main() {
     for (int i = 0; i < (int) lst->_size; ++i) {
         printf("%d: %lf\n", i, lst->at(lst, i));
     }
+    puts("");
+
+    printf("size=%d\n", lst->_size);
+    printf("%lf, ", lst->pop(lst, 8));      // pop an element from the middle,
+    printf("%lf, ", lst->pop(lst, 0));      // from the beginning
+    printf("%lf\n", lst->pop(lst, -1));     // and from the end
+    printf("size=%d\n", lst->_size);
 
     delete_List_double(lst);
     delete_List_double(for_append);

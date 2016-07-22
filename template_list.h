@@ -331,6 +331,36 @@ method_body_(void, embed, List(T)) with_(int index, List(T) lst) {              
 } throws_(INDEX_IS_OUT_OF_RANGE)                                                \
                                                                                 \
                                                                                 \
+method_body_(T, pop, List(T)) with_(int index) {                                \
+    if (!self->has_index(self, index)) {                                        \
+        Throw(INDEX_IS_OUT_OF_RANGE);                                           \
+    }                                                                           \
+                                                                                \
+    index = _get_abs_index(index, self->_size);                                 \
+                                                                                \
+    if (index == 0) {   /* first element */                                     \
+        return self->pop_front(self);                                           \
+    } else if (index == (int) self->_size - 1) {    /* last element */          \
+        return self->pop_back(self);                                            \
+    } else {    /* element in the middle */                                     \
+        Node_##T*   node = _search_node(self, index);                           \
+        T           value = node->_data;                                        \
+                                                                                \
+        node->_next->_prev = node->_prev;                                       \
+        node->_prev->_next = node->_next;                                       \
+                                                                                \
+        node->_next = NULL;                                                     \
+        node->_prev = NULL;                                                     \
+                                                                                \
+        free(node);                                                             \
+        node = NULL;                                                            \
+        --self->_size;                                                          \
+                                                                                \
+        return value;                                                           \
+    }                                                                           \
+} throws_(INDEX_IS_OUT_OF_RANGE)                                                \
+                                                                                \
+                                                                                \
 constructor_(List(T))() {                                                       \
     new_self_(List_##T);                                                        \
                                                                                 \
@@ -352,6 +382,7 @@ constructor_(List(T))() {                                                       
     init_method_(append);                                                       \
     init_method_(prepend);                                                      \
     init_method_(embed);                                                        \
+    init_method_(pop);                                                          \
                                                                                 \
     return self;                                                                \
 }                                                                               \
