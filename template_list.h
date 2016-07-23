@@ -361,6 +361,39 @@ method_body_(T, pop, List(T)) with_(int index) {                                
 } throws_(INDEX_IS_OUT_OF_RANGE)                                                \
                                                                                 \
                                                                                 \
+method_body_(void, swap, List(T)) with_(int index_1, int index_2) {             \
+    if (!self->has_index(self, index_1) ||                                      \
+        !self->has_index(self, index_2))                                        \
+    {                                                                           \
+        Throw(INDEX_IS_OUT_OF_RANGE);                                           \
+    }                                                                           \
+                                                                                \
+                                                                                \
+    index_1 = _get_abs_index(index_1, self->_size);                             \
+    index_2 = _get_abs_index(index_2, self->_size);                             \
+                                                                                \
+    if (index_1 != index_2) {                                                   \
+        Node_##T* node_1 = _search_node(self, index_1);                         \
+        Node_##T* node_2 = _search_node(self, index_2);                         \
+        T value = node_1->_data;                                                \
+                                                                                \
+        node_1->_data = node_2->_data;                                          \
+        node_2->_data = value;                                                  \
+    }                                                                           \
+} throws_(INDEX_IS_OUT_OF_RANGE)                                                \
+                                                                                \
+                                                                                \
+method_body_(List(T), copy, List(T)) without_args {                             \
+    List(T) new_lst = new_(List_##T)();                                         \
+                                                                                \
+    for (Node_##T* it = self->_head; it != NULL; it = it->_next) {              \
+        new_lst->push_back(new_lst, it->_data);                                 \
+    }                                                                           \
+                                                                                \
+    return new_lst;                                                             \
+}                                                                               \
+                                                                                \
+                                                                                \
 constructor_(List(T))() {                                                       \
     new_self_(List_##T);                                                        \
                                                                                 \
@@ -383,6 +416,8 @@ constructor_(List(T))() {                                                       
     init_method_(prepend);                                                      \
     init_method_(embed);                                                        \
     init_method_(pop);                                                          \
+    init_method_(swap);                                                         \
+    init_method_(copy);                                                         \
                                                                                 \
     return self;                                                                \
 }                                                                               \

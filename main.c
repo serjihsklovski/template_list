@@ -68,10 +68,33 @@ int main() {
     printf("%lf\n", lst->pop(lst, -1));     // and from the end
     printf("size=%d\n", lst->_size);
 
+    puts("");
+
+    for (int i = 0; i < (int) lst->_size; ++i) {
+        printf("%d: %lf\n", i, lst->at(lst, i));
+    }
+    puts("");
+
+    lst->swap(lst, 3, 7);
+
+    for (int i = 0; i < (int) lst->_size; ++i) {
+        printf("%d: %lf\n", i, lst->at(lst, i));
+    }
+    puts("");
+
+    List(double) dup = lst->copy(lst);
+
     delete_List_double(lst);
     delete_List_double(for_append);
     delete_List_double(for_prepend);
     delete_List_double(for_embed);
+
+    for (int i = 0; i < (int) dup->_size; ++i) {
+        printf("%d: %lf\n", i, dup->at(dup, i));
+    }
+    puts("");
+
+    delete_List_double(dup);
 
     return 0;
 }
