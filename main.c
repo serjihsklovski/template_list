@@ -107,9 +107,24 @@ int main() {
     }
     puts("");
 
+    slc_2->reverse(slc_2);
+
+    for (int i = 0; i < (int) slc_2->_size; ++i) {
+        printf("%d: %lf\n", i, slc_2->at(slc_2, i));
+    }
+    puts("");
+
+    List(double) rev = slc_1->reversed(slc_1);
+
+    for (int i = 0; i < (int) rev->_size; ++i) {
+        printf("%d: %lf\n", i, rev->at(rev, i));
+    }
+    puts("");
+
     delete_List_double(dup);
     delete_List_double(slc_1);
     delete_List_double(slc_2);
+    delete_List_double(rev);
 
     return 0;
 }

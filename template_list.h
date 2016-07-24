@@ -50,6 +50,8 @@ cclass_(List_##T) {                                                             
     method_def_(void,   swap,       List(T)) with_(int index_1, int index_2);   \
     method_def_(List(T), copy,      List(T)) without_args;                      \
     method_def_(List(T), slice,     List(T)) with_(int beg, int count, int step);   \
+    method_def_(void,   reverse,    List(T)) without_args;                      \
+    method_def_(List(T), reversed,  List(T)) without_args;                      \
 };                                                                              \
                                                                                 \
 constructor_(List(T))();                                                        \
@@ -444,6 +446,24 @@ method_body_(List(T), slice, List(T)) with_(int beg, int count, int step) {     
 } throws_(INDEX_IS_OUT_OF_RANGE, NEGATIVE_COUNT, ZERO_STEP)                     \
                                                                                 \
                                                                                 \
+method_body_(void, reverse, List(T)) without_args {                             \
+    for (int i = 0; i < (int) self->_size / 2; ++i) {                           \
+        self->swap(self, i, -(i + 1));                                          \
+    }                                                                           \
+}                                                                               \
+                                                                                \
+                                                                                \
+method_body_(List(T), reversed, List(T)) without_args {                         \
+    List(T) new_lst = new_(List_##T)();                                         \
+                                                                                \
+    for (Node_##T* node = self->_head; node != NULL; node = node->_next) {      \
+        new_lst->push_front(new_lst, node->_data);                              \
+    }                                                                           \
+                                                                                \
+    return new_lst;                                                             \
+}                                                                               \
+                                                                                \
+                                                                                \
 constructor_(List(T))() {                                                       \
     new_self_(List_##T);                                                        \
                                                                                 \
@@ -469,6 +489,8 @@ constructor_(List(T))() {                                                       
     init_method_(swap);                                                         \
     init_method_(copy);                                                         \
     init_method_(slice);                                                        \
+    init_method_(reverse);                                                      \
+    init_method_(reversed);                                                     \
                                                                                 \
     return self;                                                                \
 }                                                                               \
