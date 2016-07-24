@@ -7,7 +7,9 @@ extern "C" {
 
 enum ErrorCodes {
     EMPTY_LIST,
-    INDEX_IS_OUT_OF_RANGE
+    INDEX_IS_OUT_OF_RANGE,
+    NEGATIVE_COUNT,
+    ZERO_STEP
 };
 
 #ifdef __cplusplus

@@ -94,7 +94,22 @@ int main() {
     }
     puts("");
 
+    List(double) slc_1 = dup->slice(dup, 2, 7, 1);
+    List(double) slc_2 = dup->slice(dup, -1, 10, -2);
+
+    for (int i = 0; i < (int) slc_1->_size; ++i) {
+        printf("%d: %lf\n", i, slc_1->at(slc_1, i));
+    }
+    puts("");
+
+    for (int i = 0; i < (int) slc_2->_size; ++i) {
+        printf("%d: %lf\n", i, slc_2->at(slc_2, i));
+    }
+    puts("");
+
     delete_List_double(dup);
+    delete_List_double(slc_1);
+    delete_List_double(slc_2);
 
     return 0;
 }

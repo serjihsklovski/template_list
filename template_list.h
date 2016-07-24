@@ -49,7 +49,7 @@ cclass_(List_##T) {                                                             
     method_def_(void,   clear,      List(T)) without_args;                      \
     method_def_(void,   swap,       List(T)) with_(int index_1, int index_2);   \
     method_def_(List(T), copy,      List(T)) without_args;                      \
-    method_def_(List(T), slice,     List(T)) with_(int beg, int end, int step); \
+    method_def_(List(T), slice,     List(T)) with_(int beg, int count, int step);   \
 };                                                                              \
                                                                                 \
 constructor_(List(T))();                                                        \
@@ -394,6 +394,56 @@ method_body_(List(T), copy, List(T)) without_args {                             
 }                                                                               \
                                                                                 \
                                                                                 \
+method_body_(List(T), slice, List(T)) with_(int beg, int count, int step) {     \
+    if (!self->has_index(self, beg)) {                                          \
+        Throw(INDEX_IS_OUT_OF_RANGE);                                           \
+    }                                                                           \
+                                                                                \
+    if (count < 0) {                                                            \
+        Throw(NEGATIVE_COUNT);                                                  \
+    }                                                                           \
+                                                                                \
+    beg = _get_abs_index(beg, self->_size);                                     \
+                                                                                \
+    if (step == 0) {                                                            \
+        Throw(ZERO_STEP);                                                       \
+    } else if (step > 0) {                                                      \
+        if (beg + count > (int) self->_size) {                                  \
+            Throw(INDEX_IS_OUT_OF_RANGE);                                       \
+        }                                                                       \
+    } else {    /* step < 0 */                                                  \
+        if (beg - count < -1) {                                                 \
+            Throw(INDEX_IS_OUT_OF_RANGE);                                       \
+        }                                                                       \
+    }                                                                           \
+                                                                                \
+    Node_##T*   it = _search_node(self, beg);                                   \
+    List(T)     new_lst = new_(List_##T)();                                     \
+                                                                                \
+    if (step > 0) {                                                             \
+        for (int i = 0; i < count; ++i) {                                       \
+            if (i % step == 0) {                                                \
+                new_lst->push_back(new_lst, it->_data);                         \
+            }                                                                   \
+                                                                                \
+            it = it->_next;                                                     \
+        }                                                                       \
+    } else {    /* step < 0 */                                                  \
+        step = -step;                                                           \
+                                                                                \
+        for (int i = 0; i < count; ++i) {                                       \
+            if (i % step == 0) {                                                \
+                new_lst->push_back(new_lst, it->_data);                         \
+            }                                                                   \
+                                                                                \
+            it = it->_prev;                                                     \
+        }                                                                       \
+    }                                                                           \
+                                                                                \
+    return new_lst;                                                             \
+} throws_(INDEX_IS_OUT_OF_RANGE, NEGATIVE_COUNT, ZERO_STEP)                     \
+                                                                                \
+                                                                                \
 constructor_(List(T))() {                                                       \
     new_self_(List_##T);                                                        \
                                                                                 \
@@ -418,6 +468,7 @@ constructor_(List(T))() {                                                       
     init_method_(pop);                                                          \
     init_method_(swap);                                                         \
     init_method_(copy);                                                         \
+    init_method_(slice);                                                        \
                                                                                 \
     return self;                                                                \
 }                                                                               \
